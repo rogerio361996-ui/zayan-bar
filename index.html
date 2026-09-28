@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZAYAN — Inauguração | 5 Cervejas Grátis</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { 
+            background: linear-gradient(180deg, #000000, #1a1508, #2b2010); 
+            color: white; 
+            min-height: 100vh; 
+            padding: 20px; 
+        }
+        .container { max-width: 420px; margin: 0 auto; text-align: center; }
+        
+        /* LOGÓTIPO ZAYAN */
+        .logo {
+            font-size: 42px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        .logo-z, .logo-y, .logo-n { color: #ffd700; text-shadow: 0 0 10px #ffd700, 0 2px 4px rgba(0,0,0,0.5); }
+        .logo-a, .logo-a2 { color: #fff; }
+        .slogan {
+            color: #ffd700;
+            font-size: 14px;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+        
+        h1 { color: #ffd700; margin-bottom: 10px; font-size: 22px; }
+        h2 { font-size: 17px; margin: 15px 0 8px; color: #ffd700; }
+        .card { 
+            background: rgba(255,215,0,0.08); 
+            border: 1px solid rgba(255,215,0,0.2);
+            padding: 25px; 
+            border-radius: 15px; 
+            margin: 20px 0; 
+        }
+        input { 
+            width: 100%; padding: 12px; font-size: 16px; border: none; 
+            border-radius: 8px; margin: 8px 0; color: #222; 
+            background: #fff;
+        }
+        input.pequeno { width: 80px; text-align: center; display: inline-block; margin-left: 8px; }
+        button { 
+            background: linear-gradient(90deg, #ffd700, #ffb300);
+            color: #000; font-weight: bold; border: none; 
+            padding: 13px 25px; font-size: 16px; border-radius: 8px; 
+            cursor: pointer; width: 100%; margin-top: 8px; 
+            box-shadow: 0 4px 0 #cc9000;
+            transition: transform 0.1s;
+        }
+        button:active { transform: translateY(2px); box-shadow: 0 2px 0 #cc9000; }
+        button:disabled { background: #555; box-shadow: none; cursor: not-allowed; opacity: 0.6; }
+        .btn-admin { background: linear-gradient(90deg, #28a745, #20c997); box-shadow: 0 4px 0 #1e7e34; color: white; margin-top: 10px; }
+        .btn-liberar { background: linear-gradient(90deg, #ff9500, #ffc107); box-shadow: 0 4px 0 #cc7700; color: #000; padding: 10px; font-size: 15px; }
+        .btn-convidado { background: linear-gradient(90deg, #00b4d8, #0077b6); box-shadow: 0 4px 0 #005f8a; color: white; }
+        .btn-apagar { background: linear-gradient(90deg, #dc3545, #c82333); box-shadow: 0 4px 0 #a71d2a; color: white; padding: 6px 10px; font-size: 13px; width: auto; margin: 0; }
+        .qrcode-area { background: white; padding: 25px; border-radius: 12px; margin: 20px auto; display: inline-block; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        canvas { max-width: 260px; }
+        .contador { font-size: 36px; font-weight: bold; color: #ffd700; margin: 15px 0; }
+        .subtitulo { font-size: 14px; opacity: 0.9; margin-bottom: 10px; line-height: 1.5; }
+        .aviso { background: rgba(255,215,0,0.1); padding: 12px; border-radius: 8px; margin-top: 15px; font-size: 13px; line-height: 1.6; border-left: 3px solid #ffd700; }
+        .aviso-limite { background: rgba(220,53,69,0.15); border: 1px solid rgba(220,53,69,0.3); border-left: 3px solid #dc3545; }
+        .passo { display: none; }
+        .passo.ativo { display: block !important; }
+        #camera { width: 100%; max-width: 360px; border-radius: 10px; background: #000; margin: 15px 0; }
+        .resultado { background: rgba(40,167,69,0.15); padding: 15px; border-radius: 10px; margin-top: 15px; display: none; border: 1px solid rgba(40,167,69,0.3); }
+        .resultado.visivel { display: block; }
+        .erro { background: rgba(220,53,69,0.15); border: 1px solid rgba(220,53,69,0.3); display: none; }
+        .erro.visivel { display: block; }
+        .menu-principal { margin-top: 10px; }
+        .voltar { background: #444; box-shadow: 0 4px 0 #222; }
+        .vagas { font-size: 17px; font-weight: bold; color: #ffd700; margin: 12px 0; padding: 8px; background: rgba(255,215,0,0.1); border-radius: 8px; }
+        .vagas.cheias { color: #ff6b6b; background: rgba(255,0,0,0.1); }
+        .lista-convidados { text-align: left; margin-top: 15px; max-height: 320px; overflow-y: auto; }
+        .item-convidado { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+        .nome-convidado { font-weight: bold; flex: 1; }
+        .qtd-cervejas { color: #ffd700; font-weight: bold; margin-right: 10px; }
+        .qtd-zero { color: #666; }
+        .area-liberar { margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .data-evento { font-size: 13px; color: #ffd700; margin-bottom: 15px; font-weight: 500; }
+        .destaque-qr { background: rgba(255,215,0,0.15); padding: 15px; border-radius: 10px; margin-top: 15px; border: 2px solid #ffd700; }
+        .sucesso-qr { color: #2ecc71; font-weight: bold; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 🏠 MENU PRINCIPAL -->
+        <div class="passo ativo" id="menu">
+            <div class="logo">
+                <span class="logo-z">Z</span><span class="logo-a">A</span><span class="logo-y">Y</span><span class="logo-a2">A</span><span class="logo-n">N</span>
+            </div>
+            <div class="slogan">FAST FOOD • SABOR • QUALIDADE</div>
+            
+            <h1>🎉 INAUGURAÇÃO</h1>
+            <p class="data-evento">02 de Outubro de 2026 — Kilamba Kiaxi, Subzona 10</p>
+            <p class="subtitulo">Bem-vindo! Os primeiros convidados recebem <strong>5 cervejas grátis</strong> 🎁</p>
+            
+            <div class="vagas" id="contagemVagas"></div>
+            
+            <div class="card menu-principal">
+                <button class="btn-convidado" id="btnConvite" onclick="mostrarConvidado()">👤 SOU CONVIDADO — GERAR MEU CÓDIGO</button>
+                <button class="btn-admin" onclick="mostrarAdmin()">🔐 SOU DO BALCÃO — GERIR</button>
+            </div>
+            
+            <div class="aviso">
+                💡 Cada convidado gera o seu próprio código QR individual após cadastro!
+            </div>
+        </div>
+
+        <!-- 👤 ÁREA DO CONVIDADO — QR GARANTIDO -->
+        <div class="passo" id="areaConvidado">
+            <button class="voltar" onclick="voltarMenu()">← Voltar</button>
+            
+            <div class="logo" style="font-size:32px; margin-bottom:5px;">
+                <span class="logo-z">Z</span><span class="logo-a">A</span><span class="logo-y">Y</span><span class="logo-a2">A</span><span class="logo-n">N</span>
+            </div>
+            <div class="slogan" style="margin-bottom:15px;">O SEU CÓDIGO EXCLUSIVO</div>
+            
+            <h1 id="tituloConvite">🎉 BEM-VINDO AO ZAYAN!</h1>
+            <p class="subtitulo">Tens direito a <strong>5 CERVEJAS GRÁTIS</strong>!<br>Digita o teu nome e gera o teu código:</p>
+            
+            <div class="card" id="formConvite">
+                <input type="text" id="nomeConvidado" placeholder="Escreve o teu nome completo aqui...">
+                <button onclick="gerarMeuQR()">✅ GERAR O MEU CÓDIGO QR</button>
+                
+                <!-- CÓDIGO QR INDIVIDUAL — SEMPRE VISÍVEL APÓS CADASTRO -->
+                <div id="meuCodigo" style="display:none; margin-top:25px;">
+                    <div class="destaque-qr">
+                        <p style="font-weight:bold; font-size:16px;">📱 Apresenta este código no balcão:</p>
+                        <div class="qrcode-area">
+                            <canvas id="qrConvidado"></canvas>
+                        </div>
+                        <p class="sucesso-qr">✅ Código gerado com sucesso!</p>
+                        <p style="font-size:14px; margin-top:10px;">Olá, <strong id="nomeExibido"></strong></p>
+                        <p class="contador" id="meuContador">5 / 5 🍺</p>
+                        <p style="font-size:12px; opacity:0.7; margin-top:10px;">⚠️ Guarda esta página! É o teu bilhete único e intransmissível.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card aviso-limite" id="limiteAtingido" style="display:none;">
+                <h3>❌ VAGAS ESGOTADAS!</h3>
+                <p>Já foram preenchidas todas as vagas disponíveis.</p>
+                <p style="margin-top:8px;">Obrigado pela visita ao <strong>ZAYAN</strong>! 🥂</p>
+            </div>
+        </div>
+
+        <!-- 🔐 ÁREA DO ADMINISTRADOR — COM APAGAR -->
+        <div class="passo" id="areaAdmin">
+            <button class="voltar" onclick="voltarMenu()">← Voltar</button>
+            
+            <div class="logo" style="font-size:32px; margin-bottom:5px;">
+                <span class="logo-z">Z</span><span class="logo-a">A</span><span class="logo-y">Y</span><span class="logo-a2">A</span><span class="logo-n">N</span>
+            </div>
+            <div class="slogan" style="margin-bottom:15px;">PAINEL DE CONTROLO</div>
+            
+            <h1>🔐 ACESSO DO BALCÃO</h1>
+            
+            <div class="card" id="formSenha">
+                <input type="password" id="senhaAdmin" placeholder="Digita a senha de acesso...">
+                <button class="btn-admin" onclick="verificarSenha()">ENTRAR NO SISTEMA 🔑</button>
+            </div>
+            
+            <div id="areaLeitura" style="display:none;">
+                <!-- 📋 LISTA COM APAGAR -->
+                <h2>📋 Lista de Convidados Registrados</h2>
+                <div class="card lista-convidados" id="listaConvidados">
+                    <p style="opacity:0.6;">Nenhum convidado cadastrado ainda.</p>
+                </div>
+
+                <!-- 📷 LEITURA QR -->
+                <h2>📷 Ler Código QR do Convidado</h2>
+                <p style="font-size:13px; opacity:0.8;">Aponta a câmera para o código que aparece no telemóvel do convidado:</p>
+                <video id="camera" autoplay playsinline></video>
+                <button onclick="pararCamera()" style="background:#dc3545; box-shadow: 0 4px 0 #a71d2a; color:white;">⏹️ Parar Câmera</button>
+                
+                <div class="resultado" id="resultadoLeitura">
+                    <h3 id="nomeLido"></h3>
+                    <p>Cervejas restantes:</p>
+                    <p class="contador" id="contadorLido"></p>
+                    <button class="btn-admin" onclick="descontarAdmin()">🍺 DESCONTAR 1 CERVEJA</button>
+                </div>
+                <div class="erro resultado" id="erroLeitura">
+                    <p>❌ Código não reconhecido, já utilizado ou inválido!</p>
+                </div>
+
+                <!-- 🔓 LIBERAR VAGAS -->
+                <div class="card area-liberar">
+                    <h2>🔓 Liberar Mais Vagas</h2>
+                    <p style="font-size:14px;">Disponíveis: <strong id="vagasAtuais"></strong></p>
+                    <button class="btn-liberar" onclick="liberarMaisVagas()">+ 5 VAGAS</button>
+                    <button class="btn-liberar" style="background:linear-gradient(90deg, #00b4d8, #0096c7); box-shadow: 0 4px 0 #00779e; color:white;" onclick="liberarQuantidade()">+ Outra Quantidade</button>
+                    <input type="number" id="novaQuantidade" class="pequeno" min="1" placeholder="Nº">
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+// ⚙️ CONFIGURAÇÕES
+const SENHA_ADMIN = "4321";
+const LIMITE_INICIAL = 14;
+let LIMITE_CONVIDADOS = LIMITE_INICIAL;
+let convidados = JSON.parse(localStorage.getItem("convidados") || "{}");
+let streamCamera = null;
+
+// --- NAVEGAÇÃO ---
+function mostrarConvidado() {
+    document.getElementById("menu").classList.remove("ativo");
+    document.getElementById("areaAdmin").classList.remove("ativo");
+    document.getElementById("areaConvidado").classList.add("ativo");
+    
+    const total = Object.keys(convidados).length;
+    
+    // Se já tem cadastro → mostra o QR imediatamente
+    if (localStorage.getItem("meuCodigoDados")) {
+        const dados = JSON.parse(localStorage.getItem("meuCodigoDados"));
+        document.getElementById("formConvite").style.display = "block";
+        document.getElementById("limiteAtingido").style.display = "none";
+        document.getElementById("nomeConvidado").value = dados.nome;
+        mostrarMeuCodigo(dados);
+        return;
+    }
+    
+    if (total >= LIMITE_CONVIDADOS) {
+        document.getElementById("formConvite").style.display = "none";
+        document.getElementById("limiteAtingido").style.display = "block";
+        return;
+    }
+    
+    document.getElementById("formConvite").style.display = "block";
+    document.getElementById("limiteAtingido").style.display = "none";
+}
+
+function mostrarAdmin() {
+    document.getElementById("menu").classList.remove("ativo");
+    document.getElementById("areaConvidado").classList.remove("ativo");
+    document.getElementById("areaAdmin").classList.add("ativo");
+    atualizarListaConvidados();
+}
+
+function voltarMenu() {
+    pararCamera();
+    document.querySelectorAll(".passo").forEach(p => p.classList.remove("ativo"));
+    document.getElementById("menu").classList.add("ativo");
+    document.getElementById("areaLeitura").style.display = "none";
+    atualizarContagemVagas();
+}
+
+// --- CONTAR VAGAS ---
+function atualizarContagemVagas() {
+    const total = Object.keys(convidados).length;
+    const vagasRestantes = LIMITE_CONVIDADOS - total;
+    const el = document.getElementById("contagemVagas");
+    
+    if (vagasRestantes > 0) {
+        el.className = "vagas";
+        el.textContent = `${vagasRestantes} vaga(s) disponível(is) de ${LIMITE_CONVIDADOS}`;
+        document.getElementById("btnConvite").disabled = false;
+    } else {
+        el.className = "vagas cheias";
+        el.textContent = `⚠️ ${LIMITE_CONVIDADOS} vagas preenchidas`;
+        document.getElementById("btnConvite").disabled = true;
+    }
+    
+    const vagasAtuais = document.getElementById("vagasAtuais");
+    if (vagasAtuais) vagasAtuais.textContent = `${vagasRestantes} de ${LIMITE_CONVIDADOS}`;
+}
+
+// --- LISTA COM APAGAR ---
+function atualizarListaConvidados() {
+    const container = document.getElementById("listaConvidados");
+    const ids = Object.keys(convidados);
+    
+    if (ids.length === 0) {
+        container.innerHTML = '<p style="opacity:0.6;">Nenhum convidado cadastrado ainda.</p>';
+        return;
+    }
+    
+    ids.sort((a, b) => convidados[b].quantidade - convidados[a].quantidade);
+    
+    container.innerHTML = ids.map(id => {
+        const c = convidados[id];
+        return `
+            <div class="item-convidado">
+                <span class="nome-convidado">${c.nome}</span>
+                <span class="qtd-cervejas ${c.quantidade===0?'qtd-zero':''}">${c.quantidade}/5 🍺</span>
+                <button class="btn-apagar" onclick="apagarConvidado('${id}')">🗑️ Apagar</button>
+            </div>
+        `;
+    }).join('');
+}
+
+// --- APAGAR CONVIDADO ---
+function apagarConvidado(id) {
+    const nome = convidados[id].nome;
+    if (!confirm(`Tens a certeza que queres REMOVER:\n"${nome}"\n\nEsta ação não pode ser desfeita!`)) {
+        return;
+    }
+    
+    delete convidados[id];
+    localStorage.setItem("convidados", JSON.stringify(convidados));
+    
+    // Se for o próprio usuário a apagar-se, limpa o cadastro local
+    const meuDados = localStorage.getItem("meuCodigoDados");
+    if (meuDados) {
+        const meuId = JSON.parse(meuDados).id;
+        if (meuId === id) {
+            localStorage.removeItem("meuCodigoDados");
+        }
+    }
+    
+    alert(`✅ "${nome}" foi removido com sucesso!`);
+    atualizarListaConvidados();
+    atualizarContagemVagas();
+}
+
+// --- LIBERAR VAGAS ---
+function liberarMaisVagas() {
+    LIMITE_CONVIDADOS += 5;
+    localStorage.setItem("limiteVagas", LIMITE_CONVIDADOS);
+    alert(`✅ +5 vagas adicionadas! Novo total: ${LIMITE_CONVIDADOS}`);
+    atualizarContagemVagas();
+}
+
+function liberarQuantidade() {
+    const qtd = parseInt(document.getElementById("novaQuantidade").value);
+    if (!qtd || qtd < 1) { alert("Digita um número válido!"); return; }
+    LIMITE_CONVIDADOS += qtd;
+    localStorage.setItem("limiteVagas", LIMITE_CONVIDADOS);
+    alert(`✅ +${qtd} vagas adicionadas! Novo total: ${LIMITE_CONVIDADOS}`);
+    document.getElementById("novaQuantidade").value = "";
+    atualizarContagemVagas();
+}
+
+// --- GERAR QR INDIVIDUAL — REFORÇADO ---
+function gerarMeuQR() {
+    const totalAtual = Object.keys(convidados).length;
+    
+    if (totalAtual >= LIMITE_CONVIDADOS) {
+        alert("❌ Todas as vagas foram preenchidas!");
+        voltarMenu();
+        return;
+    }
+    
+    const nome = document.getElementById("nomeConvidado").value.trim();
+    if (!nome) { alert("⚠️ Por favor, digita o teu nome!"); return; }
+    
+    // Gerar ID único para cada convidado
+    const id = "ZAYAN-" + Math.random().toString(36).substring(2, 10).toUpperCase();
+    const dados = { id, nome, quantidade: 5 };
+    
+    // Guardar nos dados globais
+    convidados[id] = dados;
+    localStorage.setItem("convidados", JSON.stringify(convidados));
+    
+    // Guardar para o próprio convidado
+    localStorage.setItem("meuCodigoDados", JSON.stringify(dados));
+    
+    // Mostrar o código QR IMEDIATAMENTE
+    mostrarMeuCodigo(dados);
+    atualizarContagemVagas();
+    atualizarListaConvidados();
+}
+
+function mostrarMeuCodigo(dados) {
+    // Exibir o nome e o contador
+    document.getElementById("meuCodigo").style.display = "block";
+    document.getElementById("nomeExibido").textContent = dados.nome;
+    document.getElementById("meuContador").textContent = dados.quantidade + " / 5 🍺";
+    
+    // Gerar o QR Code com os dados do convidado
+    QRCode.toCanvas(
+        document.getElementById("qrConvidado"),
+        JSON.stringify({ 
+            id: dados.id, 
+            nome: dados.nome,
+            tipo: "convite_zayan"
+        }),
+        { 
+            width: 260, 
+            margin: 3,
+            color: { dark: "#000000", light: "#ffffff" }
+        },
+        function (error) {
+            if (error) {
+                console.error("Erro ao gerar QR:", error);
+                alert("❌ Erro ao gerar o código! Recarrega a página e tenta novamente.");
+            }
+        }
+    );
+}
+
+// --- ADMIN: Acesso e Leitura ---
+function verificarSenha() {
+    const senha = document.getElementById("senhaAdmin").value.trim();
+    if (senha === SENHA_ADMIN) {
+        document.getElementById("formSenha").style.display = "none";
+        document.getElementById("areaLeitura").style.display = "block";
+        atualizarListaConvidados();
+        iniciarCamera();
+    } else {
+        alert("❌ Senha incorreta! Tenta novamente.");
+    }
+}
+
+async function iniciarCamera() {
+    try {
+        streamCamera = await navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: "environment" } 
+        });
+        const video = document.getElementById("camera");
+        video.srcObject = streamCamera;
+        video.onloadedmetadata = () => {
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            setInterval(() => lerQR(canvas, ctx, video), 500);
+        };
+    } catch (e) {
+        alert("❌ Não foi possível acessar a câmera! Permite o acesso nas definições do navegador.");
+    }
+}
+
+function pararCamera() {
+    if (streamCamera) {
+        streamCamera.getTracks().forEach(t => t.stop());
+        streamCamera = null;
+    }
+}
+
+function lerQR(canvas, ctx, video) {
+    if (!video.videoWidth) return;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0);
+    
+    const codigo = jsQR(ctx.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height);
+    if (codigo) {
+        try {
+            const dados = JSON.parse(codigo.data);
+            if (dados.id && convidados[dados.id]) {
+                mostrarResultado(convidados[dados.id]);
+            } else {
+                mostrarErro();
+            }
+        } catch {}
+    }
+}
+
+function mostrarResultado(dados) {
+    document.getElementById("resultadoLeitura").classList.add("visivel");
+    document.getElementById("erroLeitura").classList.remove("visivel");
+    document.getElementById("nomeLido").textContent = dados.nome;
+    document.getElementById("contadorLido").textContent = dados.quantidade + " / 5 🍺";
+    window.idSelecionado = dados.id;
+}
+
+function mostrarErro() {
+    document.getElementById("resultadoLeitura").classList.remove("visivel");
+    document.getElementById("erroLeitura").classList.add("visivel");
+}
+
+function descontarAdmin() {
+    const id = window.idSelecionado;
+    if (!id || !convidados[id]) {
+        alert("⚠️ Primeiro lê o código QR do convidado!");
+        return;
+    }
+    
+    if (convidados[id].quantidade > 0) {
+        convidados[id].quantidade--;
+        localStorage.setItem("convidados", JSON.stringify(convidados));
+        
+        // Atualizar também o contador do convidado se estiver com a página aberta
+        alert(`✅ Cerveja entregue a ${convidados[id].nome}!\nRestam: ${convidados[id].quantidade}/5 🍺`);
+        mostrarResultado(convidados[id]);
+        atualizarListaConvidados();
+    } else {
+        alert("❌ Este convidado já utilizou todas as 5 cervejas!");
+        mostrarErro();
+    }
+}
+
+window.onload = function() {
+    const limiteSalvo = localStorage.getItem("limiteVagas");
+    if (limiteSalvo) LIMITE_CONVIDADOS = parseInt(limiteSalvo);
+    atualizarContagemVagas();
+};
+</script>
+</body>
+</html>
